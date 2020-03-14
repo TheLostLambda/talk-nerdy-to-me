@@ -10,3 +10,4 @@
   - sli.do (AIMED)
   - http://tinyurl.com/hackmed-workshop
   - https://tinyurl.com/ai-hackmed
+  - Super cool speech stuff: https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
