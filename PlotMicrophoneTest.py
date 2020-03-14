@@ -9,6 +9,9 @@ import queue
 import sys
 import statistics
 import time
+from playsound import playsound
+
+
 
 
 
@@ -85,6 +88,8 @@ def update_plot(frame):
             
             if (((time.time()-now)>5) and (not moaned)):
                 print("English Motherfucker, do you speak it?")
+
+                playsound('KeepGoing.wav')
                 moaned = True
                 now = time.time()
         else:
