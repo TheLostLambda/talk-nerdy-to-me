@@ -6,6 +6,8 @@ import numpy as np
 import threading
 from learn_features import cat_file
 import pickle
+import os
+import random
 from scipy.io.wavfile import write
 import csv
 
@@ -13,17 +15,22 @@ import csv
 
 fs = 24414  # Sample rate
 frame_time = 1  # Duration of recording
-duration = 12
+duration = 15
 sd.default.samplerate = fs
 sd.default.channels = 1
 sd.default.dtype = 'int16'
 black = (0, 0, 0)
-notTalkingWait = 5
+notTalkingWait = 3
 notTalkingCount = 0
 
 
 (rate,sig) = wav.read('mother_talk.wav')
-
+#%%
+soundbank = []
+for root, dirs, files in os.walk('clips/'):
+    for f in files:
+        soundbank.append(wav.read(os.path.join(root, f)))
+# %%
 chunks = []
 buffer = np.array([])
 _image_library = {}
@@ -146,6 +153,7 @@ with sd.InputStream(callback=listen_chunk):
                                         notTalkingCount = 0
                                 print(notTalkingCount)
                 if(notTalkingCount>=notTalkingWait):
+                        (rate,sig) = random.choice(soundbank)
                         sd.play(sig,rate)
                         notTalkingCount = 0
                         
