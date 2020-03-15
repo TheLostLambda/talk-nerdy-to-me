@@ -14,14 +14,16 @@ import csv
 (scaler, model) = pickle.load(open('trained_model', 'rb'))
 
 fs = 24414  # Sample rate
-frame_time = 1  # Duration of recording
+frame_time = 2  # Duration of recording
 duration = 30
 sd.default.samplerate = fs
 sd.default.channels = 1
 sd.default.dtype = 'int16'
 black = (0, 0, 0)
-notTalkingWait = 3
+notTalkingWait = 5
 notTalkingCount = 0
+
+strEmotion = 'Emotions'
 
 #%%
 soundbank = []
@@ -44,7 +46,8 @@ def get_image(path):
 
 def process_chunk(chunk):
     global chunks
-    pred = cat_file(chunk, fs, scaler, model)
+    next_emo = cat_file(chunk, fs, scaler, model)
+    pred = strEmotion if next_emo == 'unknown' else next_emo
     amp = np.mean(np.absolute(chunk))
     chunks.append((chunk.astype('int16'), amp, pred))
 
@@ -96,7 +99,6 @@ pathBeg = 'Background/Untitled-Artwork-'
 fileExt = '.png'
 initial = True
 font = pygame.font.Font('freesansbold.ttf', 42) 
-strEmotion = 'Emotions'
 text = font.render(strEmotion, True, black)
 X = 170
 Y = 660
