@@ -15,7 +15,7 @@ import csv
 
 fs = 24414  # Sample rate
 frame_time = 2  # Duration of recording
-duration = 30
+duration = 35
 sd.default.samplerate = fs
 sd.default.channels = 1
 sd.default.dtype = 'int16'
@@ -86,6 +86,14 @@ def get_me(emotions, chunks, continuous=True):
         wav = np.array([chunk[0] for chunk in chunks if (chunk[2] in emotions)]).flatten()
     return wav
 
+def differential_chunks(chunks):
+    wav = []
+    for i in range(0,len(chunks)-1):
+        if chunks[i][2] != chunks[i+1][2]:
+            pair = np.array([chunks[i][0], chunks[i+1][0]]).flatten()
+            wav.append(pair)
+    return wav
+
 pygame.init()
 screen = pygame.display.set_mode(( 900 , 1600))
 pygame.display.set_caption('Talk Nerdy To Me') 
@@ -146,7 +154,7 @@ with sd.InputStream(callback=listen_chunk):
                                 numChunksPrevious = numChunks
                                 strEmotion = chunks[-1][2]
                                 
-                                if (chunks[-1][1]<500):
+                                if (chunks[-1][1]<400):
                                         notTalkingCount = notTalkingCount + 1
                                         
                                 else:
@@ -175,4 +183,8 @@ with open('output/emotion_volume_results.csv', mode='w') as results_file:
         results_writer.writerow(['Emotion', 'Volume'])
         for _,vol,emo in chunks:
                results_writer.writerow([emo, int(vol)])
-   
+
+# Play back the changes
+for transition in differential_chunks(chunks):
+    sd.play(transition)
+    sd.wait()
