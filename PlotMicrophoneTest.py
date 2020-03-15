@@ -11,10 +11,6 @@ import statistics
 import time
 from playsound import playsound
 
-
-
-
-
 def int_or_str(text):
     """Helper function for argument parsing."""
     try:
