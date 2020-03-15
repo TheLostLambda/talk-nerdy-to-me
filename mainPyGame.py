@@ -7,6 +7,7 @@ import threading
 from learn_features import cat_file
 import pickle
 from scipy.io.wavfile import write
+import csv
 
 (scaler, model) = pickle.load(open('trained_model', 'rb'))
 
@@ -160,3 +161,10 @@ with sd.InputStream(callback=listen_chunk):
 
 fullConvo = get_me(['anger','disgust','fear','happy','neutral','sad','surprise'],chunks,continuous = False)
 write('output.wav', fs, fullConvo)
+
+with open('emotion_volume_results.csv', mode='w') as results_file:
+        results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        results_writer.writerow(['Emotion', 'Volume'])
+        for _,vol,emo in chunks:
+               results_writer.writerow([emo, int(vol)])
+   
