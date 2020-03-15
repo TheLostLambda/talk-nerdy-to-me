@@ -6,12 +6,13 @@ import numpy as np
 import threading
 from learn_features import cat_file
 import pickle
+from scipy.io.wavfile import write
 
 (scaler, model) = pickle.load(open('trained_model', 'rb'))
 
 fs = 24414  # Sample rate
 frame_time = 1  # Duration of recording
-duration = 10
+duration = 12
 sd.default.samplerate = fs
 sd.default.channels = 1
 sd.default.dtype = 'int16'
@@ -35,27 +36,6 @@ def get_image(path):
                 _image_library[path] = image
         return image
 
-
-
-def isTalking(myrecording,chunkCount):
-
-        chunkStart = (chunkCount-1)*fs
-        chunkEnd = (chunkCount)*fs
-        print(str(chunkStart) + " " + str(chunkEnd))
-        data = myrecording[chunkStart:chunkEnd,0]
-        data = data[np.isfinite(data)]
-        
-        data = np.absolute(data)
-        print(data)
-        meanData=np.mean(data)
-        print(meanData)
-        if (meanData < 0.001):
-                print("not Talking")
-                return False
-        else:
-                print("Is Talking")
-                return True
-
 def process_chunk(chunk):
     global chunks
     pred = cat_file(chunk, fs, scaler, model)
@@ -64,8 +44,12 @@ def process_chunk(chunk):
 
 def listen_chunk(indata, frames, time, status):
     global buffer
+    global volume
     indata = indata.flatten()
+    volume = np.mean(np.absolute(indata))/700
     chunk_size = frame_time * fs
+    
+    
     if len(buffer) + frames <= chunk_size:
         buffer = np.append(buffer,indata)
     else:
@@ -106,14 +90,19 @@ pathBeg = 'Background/Untitled-Artwork-'
 fileExt = '.png'
 initial = True
 font = pygame.font.Font('freesansbold.ttf', 42) 
-text = font.render('EMOTION', True, black)
+strEmotion = 'Emotions'
+text = font.render(strEmotion, True, black)
 X = 170
 Y = 660
 textRect = text.get_rect()  
 numChunksPrevious = 0
 # set the center of the rectangular object. 
 textRect.center = (X , Y) 
+volume = 0
+duckImg = pygame.image.load('duck.png')
 
+
+    
 with sd.InputStream(callback=listen_chunk):
         
         while not done:
@@ -121,27 +110,22 @@ with sd.InputStream(callback=listen_chunk):
                         if event.type == pygame.QUIT:
                                 done = True
                 
-                screen.blit(text, textRect) 
+               
 
                 DeltaTime = DeltaTime + clock.get_time()
                 
                 filePathStr = pathBeg + str(count) + fileExt
-                
+                screen.blit(get_image(filePathStr), (0, 0))
                 if (initial == True):
-                        screen.blit(get_image(filePathStr), (0, 0))
                         count = count + 1
                         initial = False
                                 
                 
                 if(DeltaTime>((duration/41)*1000)):
-                        screen.blit(get_image(filePathStr), (0, 0))
                         count = count + 1
                         DeltaTime = 0
                 
-
-
                 if (count > 41):
-                
                         count = 1
                         DeltaTime = 0
                         done = True
@@ -152,7 +136,8 @@ with sd.InputStream(callback=listen_chunk):
                         numChunks = len(chunks)
                         if (numChunks > numChunksPrevious):
                                 numChunksPrevious = numChunks
-                                text = font.render(chunks[-1][2], True, black)
+                                strEmotion = chunks[-1][2]
+                                
                                 if (chunks[-1][1]<500):
                                         notTalkingCount = notTalkingCount + 1
                                         
@@ -161,8 +146,17 @@ with sd.InputStream(callback=listen_chunk):
                                 print(notTalkingCount)
                 if(notTalkingCount>=notTalkingWait):
                         sd.play(sig,rate)
+                        notTalkingCount = 0
                         
-                
+                width = max(30 ,int(volume*20))
+                height = max(30, int(volume*20))
+                screen.blit(pygame.transform.scale(duckImg, (width, height)), (330 - (width//2),1100-(height//2)))
+                text = font.render(strEmotion, True, black)
+                screen.blit(text, textRect) 
 
                 pygame.display.flip()
                 clock.tick(60)
+
+
+fullConvo = get_me(['anger','disgust','fear','happy','neutral','sad','surprise'],chunks,continuous = False)
+write('output.wav', fs, fullConvo)
