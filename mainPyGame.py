@@ -15,7 +15,7 @@ import csv
 
 fs = 24414  # Sample rate
 frame_time = 1  # Duration of recording
-duration = 15
+duration = 30
 sd.default.samplerate = fs
 sd.default.channels = 1
 sd.default.dtype = 'int16'
@@ -23,8 +23,6 @@ black = (0, 0, 0)
 notTalkingWait = 3
 notTalkingCount = 0
 
-
-(rate,sig) = wav.read('mother_talk.wav')
 #%%
 soundbank = []
 for root, dirs, files in os.walk('clips/'):
@@ -168,9 +166,9 @@ with sd.InputStream(callback=listen_chunk):
 
 
 fullConvo = get_me(['anger','disgust','fear','happy','neutral','sad','surprise'],chunks,continuous = False)
-write('output.wav', fs, fullConvo)
+write('output/transcript.wav', fs, fullConvo)
 
-with open('emotion_volume_results.csv', mode='w') as results_file:
+with open('output/emotion_volume_results.csv', mode='w') as results_file:
         results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         results_writer.writerow(['Emotion', 'Volume'])
         for _,vol,emo in chunks:
