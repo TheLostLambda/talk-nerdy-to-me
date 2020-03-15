@@ -68,7 +68,7 @@ def try_to_train():
 # %%
     
 # tensor_data = load_audio_data('Data/')
-tf.keras.preprocessing.sequence.pad_sequences(tensor_data['Features'].tolist(), padding='post', maxlen=200).shape
+# tf.keras.preprocessing.sequence.pad_sequences(tensor_data['Features'].tolist(), padding='post', maxlen=200).shape
 # feats = []
 # for ident,row in tensor_data['Features'].iteritems():
 #     feats.append(row[0])
