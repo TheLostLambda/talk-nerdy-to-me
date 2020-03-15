@@ -6,22 +6,30 @@ import numpy as np
 import threading
 from learn_features import cat_file
 import pickle
+import os
+import random
+
 
 (scaler, model) = pickle.load(open('trained_model', 'rb'))
 
 fs = 24414  # Sample rate
 frame_time = 1  # Duration of recording
-duration = 10
+duration = 15
 sd.default.samplerate = fs
 sd.default.channels = 1
 sd.default.dtype = 'int16'
 black = (0, 0, 0)
-notTalkingWait = 5
+notTalkingWait = 3
 notTalkingCount = 0
 
 
 (rate,sig) = wav.read('mother_talk.wav')
-
+#%%
+soundbank = []
+for root, dirs, files in os.walk('clips/'):
+    for f in files:
+        soundbank.append(wav.read(os.path.join(root, f)))
+# %%
 chunks = []
 buffer = np.array([])
 _image_library = {}
@@ -34,27 +42,6 @@ def get_image(path):
                 image = pygame.transform.scale(image, (900, 1600))
                 _image_library[path] = image
         return image
-
-
-
-def isTalking(myrecording,chunkCount):
-
-        chunkStart = (chunkCount-1)*fs
-        chunkEnd = (chunkCount)*fs
-        print(str(chunkStart) + " " + str(chunkEnd))
-        data = myrecording[chunkStart:chunkEnd,0]
-        data = data[np.isfinite(data)]
-        
-        data = np.absolute(data)
-        print(data)
-        meanData=np.mean(data)
-        print(meanData)
-        if (meanData < 0.001):
-                print("not Talking")
-                return False
-        else:
-                print("Is Talking")
-                return True
 
 def process_chunk(chunk):
     global chunks
@@ -106,7 +93,7 @@ pathBeg = 'Background/Untitled-Artwork-'
 fileExt = '.png'
 initial = True
 font = pygame.font.Font('freesansbold.ttf', 42) 
-text = font.render('EMOTION', True, black)
+text = font.render('unknown', True, black)
 X = 170
 Y = 660
 textRect = text.get_rect()  
@@ -160,7 +147,9 @@ with sd.InputStream(callback=listen_chunk):
                                         notTalkingCount = 0
                                 print(notTalkingCount)
                 if(notTalkingCount>=notTalkingWait):
+                        (rate,sig) = random.choice(soundbank)
                         sd.play(sig,rate)
+                        notTalkingCount = 0
                         
                 
 
