@@ -22,7 +22,7 @@ r = 24414
 for root, dirs, files in os.walk(path):
     for clip_file in files:
         (rate,sig) = wav.read(os.path.join(root, clip_file))
-        sig_lens.append([sig])
+        sig_lens.append(len(sig))
 
 print(sig_lens)
 

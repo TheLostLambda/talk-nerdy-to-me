@@ -34,6 +34,8 @@ def map_classes(data_column,reverse=False):
 #     return predictions
 
 # %%
+# def get_hot()    
+
 def try_to_train():
     emotion_data = load_audio_data('Data/')
     
@@ -62,6 +64,16 @@ def try_to_train():
     # Calculate accuracy
     acc = accuracy_score(y_test, knn_predictions)
     return (scaler, knn_model, acc)
+
+# %%
+    
+# tensor_data = load_audio_data('Data/')
+tf.keras.preprocessing.sequence.pad_sequences(tensor_data['Features'].tolist(), padding='post', maxlen=200).shape
+# feats = []
+# for ident,row in tensor_data['Features'].iteritems():
+#     feats.append(row[0])
+#     padded = tf.keras.preprocessing.sequence.pad_sequences(row)
+#     print(str(len(row)) + '->' + str(len(padded)))
 
 # %%
 

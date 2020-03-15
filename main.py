@@ -26,7 +26,7 @@ def process_chunk(chunk):
 
 def listen_chunk(indata, frames, time, status):
     global buffer
-    indata = indata.flatten()
+    indata = indata.flatten() #rree
     chunk_size = frame_time * fs
     if len(buffer) + frames <= chunk_size:
         buffer = np.append(buffer,indata)
