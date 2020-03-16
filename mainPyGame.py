@@ -6,7 +6,6 @@ import numpy as np
 import threading
 from learn_features import cat_file
 import pickle
-import os
 import random
 from scipy.io.wavfile import write
 import csv
@@ -14,7 +13,7 @@ import csv
 (scaler, model) = pickle.load(open('trained_model', 'rb'))
 
 fs = 24414  # Sample rate
-frame_time = 2  # Duration of recording
+frame_time = 1  # Duration of recording
 duration = 35
 sd.default.samplerate = fs
 sd.default.channels = 1
@@ -38,7 +37,6 @@ def get_image(path):
         global _image_library
         image = _image_library.get(path)
         if image == None:
-                canonicalized_path = path.replace('/', os.sep).replace('', os.sep)
                 image = pygame.image.load(path)
                 image = pygame.transform.scale(image, (900, 1600))
                 _image_library[path] = image
@@ -185,6 +183,6 @@ with open('output/emotion_volume_results.csv', mode='w') as results_file:
                results_writer.writerow([emo, int(vol)])
 
 # Play back the changes
-for transition in differential_chunks(chunks):
-    sd.play(transition)
-    sd.wait()
+#for transition in differential_chunks(chunks):
+#    sd.play(transition)
+#    sd.wait()
